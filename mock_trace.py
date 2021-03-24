@@ -62,6 +62,10 @@ class MockTrace:
             mocker = self._passthru(path, verbose=verbose)
         self.mocker = mocker
         self.verbose = verbose
+        self.calls_count = 0
+
+    def __str__(self):
+        return f"MockTrace(function={self.path}, mocker={self.mocker.__name__}) called {self.calls_count} times"
 
     @classmethod
     def _passthru(cls, path: str, verbose: bool = False):
@@ -88,6 +92,7 @@ class MockTrace:
         if self.verbose:
             print(f'event={event}')
 
+        self.calls_count += 1
         self.events[caller_id] = event
         assert caller_id == self.call_stack.pop()
         return return_value
@@ -96,35 +101,3 @@ class MockTrace:
     def patch(cls, path: str, mocker: Callable = None, verbose: bool = False):
         mt = cls(path, mocker=mocker, verbose=verbose)
         return mock.patch(mt.path, mt)
-
-
-class FunctionTracer:
-    history = []
-
-    def __init__(self, func, mocked, verbose=False):
-        FunctionTracer.history = []
-        self.mocked = mocked
-        self.func = func
-        self.calls = []
-        self.verbose = verbose
-
-    def num_calls(self):
-        return len(self.calls)
-
-    def __call__(self, *args, **kwargs):
-        return_value = self.func(*args, **kwargs)
-        event = {
-            'function': self.mocked,
-            'mocker': self.func.__name__,
-            'args': stringify(args),
-            'kwargs': stringify(kwargs),
-            'return_value': stringify(return_value),
-        }
-        FunctionTracer.history.append(event)
-        self.calls.append(event)
-        if self.verbose:
-            print("event=%s" % event)
-        return return_value
-
-    def __str__(self):
-        return "FunctionTracer(function={0.func.__name__}) called {1} times. Call History: {0.calls}".format(self, self.num_calls())

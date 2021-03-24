@@ -41,11 +41,13 @@ def test_trace():
         sf2(4)
 
     assert mt.calls_count() == 9
+    assert str(sf2) == "MockTrace(function=examples.fibonacci.slow_fib, mocker=slow_fib) called 9 times"
 
     with mt.patch('examples.fibonacci.slow_fib') as sf2:
         sf2(4)
 
     assert mt.calls_count() == 9
+    assert str(sf2) == "MockTrace(function=examples.fibonacci.slow_fib, mocker=slow_fib) called 9 times"
 
     shape = mt.graph_shape()
     print(shape)

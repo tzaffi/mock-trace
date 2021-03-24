@@ -16,6 +16,10 @@ def test_swapin():
     ):
         g = mgood(42, name="Eastwood")
 
+    assert str(mgood) == "MockTrace(function=examples.spaghetti.good, mocker=good) called 1 times"
+    assert str(mbad) == "MockTrace(function=examples.spaghetti.bad, mocker=bad) called 1 times"
+    assert str(mugly) == "MockTrace(function=examples.spaghetti.ugly, mocker=<lambda>) called 2 times"
+
     shape = mt.graph_shape()
     print(shape)
     assert shape == [
@@ -28,9 +32,13 @@ def test_swapin():
 
     with mt.patch('examples.spaghetti.ugly', mocker=lambda _: "NOOP") as mugly:
         g = good(42, name="Eastwood")
+
+    assert str(mugly) == "MockTrace(function=examples.spaghetti.ugly, mocker=<lambda>) called 2 times"
+
     shape = mt.graph_shape()
     print(shape)
     assert shape == [
         (None, ["examples.spaghetti.ugly(['42'])",
          "examples.spaghetti.ugly(['Eastwood'])"]),
     ]
+
