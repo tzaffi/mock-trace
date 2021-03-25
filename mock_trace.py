@@ -50,6 +50,7 @@ class MockTrace:
             MockTrace.call_stack = []
             MockTrace.call_graph = defaultdict(list)
 
+        self.verbose = verbose
         self.obj = obj
 
         self.path = path
@@ -60,7 +61,6 @@ class MockTrace:
         if mocker is None:
             mocker = self._passthru(path, verbose=verbose)
         self.mocker = mocker
-        self.verbose = verbose
 
         self.calls_count = 0
 
@@ -112,8 +112,4 @@ class MockTrace:
     @classmethod
     def patch(cls, path: str, mocker: Callable = None, obj: object = None, verbose: bool = False):
         mt = cls(path, mocker=mocker, obj=obj, verbose=verbose)
-        if mt.mocked_class:
-            # return mock.patch(mt.mocked_class, mt.mocked_func, side_effect=mt)
-            return mock.patch(mt.path, mt)
-
         return mock.patch(mt.path, mt)
