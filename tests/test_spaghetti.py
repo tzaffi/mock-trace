@@ -23,22 +23,22 @@ def test_swapin():
     shape = mt.graph_shape()
     print(shape)
     assert shape == [
-        (None, ["examples.spaghetti.good(['42', 'name'])"]),
-        ("examples.spaghetti.good(['42', 'name', 'name'])", [
-         "examples.spaghetti.bad(['42'])", "examples.spaghetti.ugly(['Eastwood'])"]),
-        ("examples.spaghetti.bad(['42'])", [
-         "examples.spaghetti.ugly(['42'])"]),
+        (None, ["examples.spaghetti.good((42,){'name': 'Eastwood'})"]),
+        ("examples.spaghetti.good((42,){'name': 'Eastwood'})", [
+         'examples.spaghetti.bad((42,))', "examples.spaghetti.ugly(('Eastwood',))"]),
+        ('examples.spaghetti.bad((42,))', ['examples.spaghetti.ugly((42,))']),
     ]
+
+    shape = mt.graph_shape(hide_modules=True)
+    print(shape)
+    assert shape == [(None, ["good((42,){'name': 'Eastwood'})"]), ("good((42,){'name': 'Eastwood'})", [
+        'bad((42,))', "ugly(('Eastwood',))"]), ('bad((42,))', ['ugly((42,))'])]
 
     with mt.patch('examples.spaghetti.ugly', mocker=lambda _: "NOOP") as mugly:
         g = good(42, name="Eastwood")
 
     assert str(mugly) == "MockTrace(function=examples.spaghetti.ugly, mocker=<lambda>) called 2 times"
 
-    shape = mt.graph_shape()
+    shape = mt.graph_shape(hide_modules=True)
     print(shape)
-    assert shape == [
-        (None, ["examples.spaghetti.ugly(['42'])",
-         "examples.spaghetti.ugly(['Eastwood'])"]),
-    ]
-
+    assert shape == [(None, ['ugly((42,))', "ugly(('Eastwood',))"])]

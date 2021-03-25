@@ -52,13 +52,13 @@ def test_trace():
     shape = mt.graph_shape()
     print(shape)
     assert shape == [
-        (None, ["examples.fibonacci.slow_fib(['4'])"]),
-        ("examples.fibonacci.slow_fib(['4'])", ["examples.fibonacci.slow_fib(['3'])", "examples.fibonacci.slow_fib(['2'])"]
-         ),
-        ("examples.fibonacci.slow_fib(['3'])", ["examples.fibonacci.slow_fib(['2'])", "examples.fibonacci.slow_fib(['1'])"]
-         ),
-        ("examples.fibonacci.slow_fib(['2'])", ["examples.fibonacci.slow_fib(['1'])", "examples.fibonacci.slow_fib(['0'])"]
-         ),
-        ("examples.fibonacci.slow_fib(['2'])", ["examples.fibonacci.slow_fib(['1'])", "examples.fibonacci.slow_fib(['0'])"]
-         ),
+        (None, ['examples.fibonacci.slow_fib((4,))']),
+        ('examples.fibonacci.slow_fib((4,))', [
+         'examples.fibonacci.slow_fib((3,))', 'examples.fibonacci.slow_fib((2,))']),
+        ('examples.fibonacci.slow_fib((3,))', [
+         'examples.fibonacci.slow_fib((2,))', 'examples.fibonacci.slow_fib((1,))']),
+        ('examples.fibonacci.slow_fib((2,))', [
+         'examples.fibonacci.slow_fib((1,))', 'examples.fibonacci.slow_fib((0,))']),
+        ('examples.fibonacci.slow_fib((2,))', [
+         'examples.fibonacci.slow_fib((1,))', 'examples.fibonacci.slow_fib((0,))']),
     ]

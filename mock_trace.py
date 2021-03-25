@@ -5,19 +5,6 @@ from typing import Callable
 import uuid
 
 
-def stringify(obj: object) -> str:
-    if isinstance(obj, list):
-        return [stringify(o) for o in obj]
-
-    if isinstance(obj, dict):
-        return {str(k): stringify(v) for k, v in obj.items()}
-
-    if isinstance(obj, tuple):
-        return [stringify(o) for o in obj]
-
-    return str(obj)
-
-
 class MockTrace:
     events = {}
     call_stack = []
@@ -28,16 +15,7 @@ class MockTrace:
         return sum(len(v) for v in cls.call_graph.values())
 
     @classmethod
-    def graph_shape(cls) -> list:
-        def cid2func(cid):
-            if cid is None:
-                return None
-
-            ev = cls.events[cid]
-            args = ev['args'] if ev['args'] else ""
-            args += ev['kwargs'] if ev['kwargs'] else ""
-            return f"{ev['function']}({args})"
-
+    def graph_shape(cls, hide_modules: bool = False) -> list:
         ordered_graph = []
         call_graph = cls.call_graph.copy()
 
@@ -48,7 +26,22 @@ class MockTrace:
             ordered_graph.append((from_vertex, next_vs))
             for v in next_vs:
                 reorder(v)
+
+        def cid2func(cid):
+            if cid is None:
+                return None
+
+            ev = cls.events[cid]
+            args = str(ev['args']) if ev['args'] else ""
+            args += str(ev['kwargs']) if ev['kwargs'] else ""
+
+            f = ev['function']
+            if hide_modules:
+                f = f.split(".")[-1]
+            return f"{f}({args})"
+
         reorder(None)
+
         return [(cid2func(k), list(map(cid2func, v))) for k, v in ordered_graph]
 
     def __init__(self, path: str, mocker: Callable = None, verbose: bool = False, re_init_cls=True):
@@ -85,9 +78,9 @@ class MockTrace:
             'caller_id': caller_id,
             'function': self.path,
             'mocker': f"{self.mocker.__module__}.{self.mocker.__name__}",
-            'args': stringify(args),
-            'kwargs': stringify(kwargs),
-            'return_value': stringify(return_value),
+            'args': args,
+            'kwargs': kwargs,
+            'return_value': return_value,
         }
         if self.verbose:
             print(f'event={event}')
